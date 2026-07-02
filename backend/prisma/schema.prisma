@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Lookup Tables ───────────────────────────────────────────
+
+model Department {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique
+  employees Employee[]
+
+  @@map("departments")
+}
+
+model Country {
+  id           Int        @id @default(autoincrement())
+  name         String     @unique
+  currencyCode String
+  employees    Employee[]
+
+  @@map("countries")
+}
+
+// ─── Core Tables ─────────────────────────────────────────────
+
+model Employee {
+  id            Int            @id @default(autoincrement())
+  employeeCode  String         @unique
+  firstName     String
+  lastName      String
+  email         String         @unique
+  departmentId  Int
+  countryId     Int
+  jobLevel      JobLevel
+  hireDate      DateTime
+  status        EmployeeStatus @default(ACTIVE)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  department    Department     @relation(fields: [departmentId], references: [id])
+  country       Country        @relation(fields: [countryId], references: [id])
+  salaryHistory SalaryHistory[]
+
+  @@index([departmentId])
+  @@index([countryId])
+  @@index([status])
+  @@index([lastName, firstName])
+  @@map("employees")
+}
+
+model SalaryHistory {
+  id            Int          @id @default(autoincrement())
+  employeeId    Int
+  baseSalary    Float
+  bonus         Float        @default(0)
+  effectiveDate DateTime
+  reason        SalaryReason
+  createdAt     DateTime     @default(now())
+
+  employee      Employee     @relation(fields: [employeeId], references: [id])
+
+  @@index([employeeId, effectiveDate(sort: Desc)])
+  @@map("salary_history")
+}
+
+// ─── Enums ───────────────────────────────────────────────────
+
+enum JobLevel {
+  JUNIOR
+  MID
+  SENIOR
+  LEAD
+  MANAGER
+  DIRECTOR
+}
+
+enum EmployeeStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SalaryReason {
+  NEW_HIRE
+  RAISE
+  PROMOTION
+  CORRECTION
+}
