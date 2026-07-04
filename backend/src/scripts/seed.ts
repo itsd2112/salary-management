@@ -103,9 +103,10 @@ async function main() {
         const batch  = employees.slice(i, i + HISTORY_BATCH_SIZE);
         // Initial NEW_HIRE entry
         for (const emp of batch) {
+          const initialSalary = generateSalary(emp.jobLevel)
             historyData.push({
                 employeeId: emp.id,
-                baseSalary: generateSalary(emp.jobLevel),
+                baseSalary: initialSalary,
                 bonus: faker.number.int({ min: 1000, max: 10000 }),
                 effectiveDate: emp.hireDate,
                 reason: SalaryReason.NEW_HIRE,
@@ -114,15 +115,20 @@ async function main() {
             // 0-3 additional history entries
             const additionalEntries = faker.number.int({ min: 0, max: 3 })
             let lastDate = new Date(emp.hireDate)
+            let lastSalary = initialSalary  // track last salary
             for (let j = 0; j < additionalEntries; j++) {
                 lastDate = new Date(lastDate)
                 lastDate.setMonth(lastDate.getMonth() + faker.number.int({ min: 6, max: 18 }))
 
                 if (lastDate > new Date()) break
+                // New salary is always 5-20% higher than previous
+                  const increasePercent = faker.number.float({ min: 0.05, max: 0.20 })
+                  const newSalary = Math.round(lastSalary * (1 + increasePercent))
+                  lastSalary = newSalary  // update for next iteration
 
                 historyData.push({
                     employeeId: emp.id,
-                    baseSalary: generateSalary(emp.jobLevel),
+                    baseSalary: newSalary,
                     bonus: faker.number.int({ min: 0, max: 10000 }),
                     effectiveDate: lastDate,
                     reason: faker.helpers.arrayElement([
