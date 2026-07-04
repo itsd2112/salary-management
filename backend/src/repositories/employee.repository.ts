@@ -49,9 +49,7 @@ export const employeeRepository = {
         const orderBy: Prisma.EmployeeOrderByWithRelationInput =
             sortBy === 'hireDate'
                 ? { hireDate: sortOrder }
-                : sortBy === 'salary'
-                ? { salaryHistory: { _count: sortOrder } }
-                : { lastName: sortOrder }
+                : { firstName: sortOrder }
 
         const skip = (page - 1) * pageSize
 

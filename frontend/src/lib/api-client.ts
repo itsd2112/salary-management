@@ -4,7 +4,9 @@ import type {
     Employee,
     EmployeeFilters,
     PaginatedResponse,
-    ApiResponse
+    ApiResponse,
+    Department,
+    Country
 } from "@/types";
 
 // ---Axios Instance---
@@ -38,6 +40,18 @@ export const employeeApi = {
         .get(`/employees/${id}`)
         .then((res) => res.data)
     },
+}
+
+// ─── Lookup Endpoints ─────────────────────────────────────────
+
+export const lookupApi = {
+  getDepartments(): Promise<ApiResponse<Department[]>> {
+    return api.get('/departments').then((res) => res.data)
+  },
+
+  getCountries(): Promise<ApiResponse<Country[]>> {
+    return api.get('/countries').then((res) => res.data)
+  },
 }
 
 export default api
