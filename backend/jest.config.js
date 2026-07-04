@@ -9,8 +9,9 @@ module.exports = {
   collectCoverageFrom: [
     'src/**/*.ts',
     '!src/app.ts',
-    '!src/config/**'
+    '!src/config/**',
+    '!src/scripts/**',
   ],
   coverageDirectory: 'coverage',
-  clearMocks: true
+  clearMocks: true,
 }
