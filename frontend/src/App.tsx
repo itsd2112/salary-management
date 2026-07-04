@@ -1,19 +1,6 @@
-import { useState } from 'react'
-import './App.css'
+import { RouterProvider } from 'react-router-dom'
+import router from '@/routes'
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <h2> Salary Management App</h2>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-      </div>
-    </>
-  )
+export default function App() {
+  return <RouterProvider router={router} />
 }
-
-export default App
