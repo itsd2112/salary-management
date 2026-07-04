@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Search, Plus } from 'lucide-react'
 import { useEmployees } from '@/hooks/useEmployees'
+import { useDepartments, useCountries } from '@/hooks/useLookup'
 import type { Employee, EmployeeFilters } from '@/types'
 
-// ─── Helper ───────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────
 
 function formatSalary(employee: Employee): string {
   const current = employee.salaryHistory[0]
@@ -24,42 +25,123 @@ function formatDate(dateString: string): string {
   })
 }
 
+// ─── Sort Header Component ────────────────────────────────────
+
+function SortHeader({
+  label,
+  field,
+  currentSort,
+  currentOrder,
+  onSort,
+}: {
+  label: string
+  field: string
+  currentSort: string
+  currentOrder: string
+  onSort: (field: string) => void
+}) {
+  const isActive = currentSort === field
+  return (
+    <th
+      onClick={() => onSort(field)}
+      className="text-left px-4 py-3 font-medium text-gray-600 cursor-pointer hover:text-gray-900 select-none"
+    >
+      <span className="flex items-center gap-1">
+        {label}
+        <span className="text-gray-400">
+          {isActive ? (currentOrder === 'asc' ? '↑' : '↓') : '↕'}
+        </span>
+      </span>
+    </th>
+  )
+}
+
 // ─── Page ─────────────────────────────────────────────────────
 
 export default function EmployeeListPage() {
   const navigate = useNavigate()
 
-  const [searchInput, setSearchInput] = useState(''); 
-
+  const [searchInput, setSearchInput] = useState('')
   const [filters, setFilters] = useState<EmployeeFilters>({
     page: 1,
     pageSize: 25,
     search: '',
+    department: '',
+    country: '',
+    sortBy: 'name',
+    sortOrder: 'asc',
   })
 
-  // use debounce - wait for 400ms after user stops typing
-  useEffect(()=>{
-    const timer = setTimeout(()=>{
-      setFilters(prev => ({
-        ...prev,
-        search: searchInput,
-        page: 1
-      }))
-    }, 400);
-    return ()=>clearTimeout(timer);
-  }, [searchInput]);
-
   const { data, isLoading, isError } = useEmployees(filters)
+  const { data: departmentsData } = useDepartments()
+  const { data: countriesData } = useCountries()
+
+  const departments = departmentsData?.data ?? []
+  const countries = countriesData?.data ?? []
+
+  // ─── Handlers ─────────────────────────────────────────────
+
+  // Debounced search
+  const [searchTimer, setSearchTimer] = useState<ReturnType<typeof setTimeout> | null>(null)
 
   function handleSearch(e: React.ChangeEvent<HTMLInputElement>) {
-    setSearchInput(e.target.value);
+    const value = e.target.value
+    setSearchInput(value)
+
+    if (searchTimer) clearTimeout(searchTimer)
+    const timer = setTimeout(() => {
+      setFilters(prev => ({ ...prev, search: value, page: 1 }))
+    }, 400)
+    setSearchTimer(timer)
+  }
+
+  function handleDepartmentFilter(e: React.ChangeEvent<HTMLSelectElement>) {
+    setFilters(prev => ({
+      ...prev,
+      department: e.target.value,
+      page: 1,
+    }))
+  }
+
+  function handleCountryFilter(e: React.ChangeEvent<HTMLSelectElement>) {
+    setFilters(prev => ({
+      ...prev,
+      country: e.target.value,
+      page: 1,
+    }))
+  }
+
+  function handleSort(field: string) {
+    setFilters(prev => ({
+      ...prev,
+      sortBy: field as EmployeeFilters['sortBy'],
+      sortOrder:
+        prev.sortBy === field && prev.sortOrder === 'asc' ? 'desc' : 'asc',
+      page: 1,
+    }))
   }
 
   function handlePageChange(newPage: number) {
     setFilters(prev => ({ ...prev, page: newPage }))
   }
 
-  // ─── Loading ────────────────────────────────────────────────
+  function handleClearFilters() {
+    setSearchInput('')
+    setFilters({
+      page: 1,
+      pageSize: 25,
+      search: '',
+      department: '',
+      country: '',
+      sortBy: 'name',
+      sortOrder: 'asc',
+    })
+  }
+
+  const hasActiveFilters =
+    filters.search || filters.department || filters.country
+
+  // ─── Loading ──────────────────────────────────────────────
 
   if (isLoading) {
     return (
@@ -69,7 +151,7 @@ export default function EmployeeListPage() {
     )
   }
 
-  // ─── Error ──────────────────────────────────────────────────
+  // ─── Error ────────────────────────────────────────────────
 
   if (isError) {
     return (
@@ -82,7 +164,7 @@ export default function EmployeeListPage() {
   const employees = data?.data ?? []
   const meta = data?.meta
 
-  // ─── Render ─────────────────────────────────────────────────
+  // ─── Render ───────────────────────────────────────────────
 
   return (
     <div className="p-8">
@@ -106,19 +188,61 @@ export default function EmployeeListPage() {
         </button>
       </div>
 
-      {/* Search */}
-      <div className="relative mb-6">
-        <Search
-          size={16}
-          className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-        />
-        <input
-          type="text"
-          placeholder="Search by name or employee code..."
-          value={searchInput}
-          onChange={handleSearch}
-          className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        />
+      {/* Filters */}
+      <div className="flex gap-3 mb-6">
+
+        {/* Search */}
+        <div className="relative flex-1">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
+          <input
+            type="text"
+            placeholder="Search by name or employee code..."
+            value={searchInput}
+            onChange={handleSearch}
+            className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        </div>
+
+        {/* Department filter */}
+        <select
+          value={filters.department}
+          onChange={handleDepartmentFilter}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-600"
+        >
+          <option value="">All Departments</option>
+          {departments.map(d => (
+            <option key={d.id} value={d.name}>
+              {d.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Country filter */}
+        <select
+          value={filters.country}
+          onChange={handleCountryFilter}
+          className="px-3 py-2 text-sm border border-gray-200 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white text-gray-600"
+        >
+          <option value="">All Countries</option>
+          {countries.map(c => (
+            <option key={c.id} value={c.name}>
+              {c.name}
+            </option>
+          ))}
+        </select>
+
+        {/* Clear filters */}
+        {hasActiveFilters && (
+          <button
+            onClick={handleClearFilters}
+            className="px-3 py-2 text-sm text-gray-500 border border-gray-200 rounded-md hover:bg-gray-50"
+          >
+            Clear
+          </button>
+        )}
       </div>
 
       {/* Table */}
@@ -126,9 +250,13 @@ export default function EmployeeListPage() {
         <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-gray-200 bg-gray-50">
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Employee
-              </th>
+              <SortHeader
+                label="Employee"
+                field="name"
+                currentSort={filters.sortBy ?? 'name'}
+                currentOrder={filters.sortOrder ?? 'asc'}
+                onSort={handleSort}
+              />
               <th className="text-left px-4 py-3 font-medium text-gray-600">
                 Department
               </th>
@@ -141,16 +269,20 @@ export default function EmployeeListPage() {
               <th className="text-left px-4 py-3 font-medium text-gray-600">
                 Salary
               </th>
-              <th className="text-left px-4 py-3 font-medium text-gray-600">
-                Hire Date
-              </th>
+              <SortHeader
+                label="Hire Date"
+                field="hireDate"
+                currentSort={filters.sortBy ?? 'name'}
+                currentOrder={filters.sortOrder ?? 'asc'}
+                onSort={handleSort}
+              />
               <th className="text-left px-4 py-3 font-medium text-gray-600">
                 Status
               </th>
             </tr>
           </thead>
           <tbody>
-            {employees.map((employee) => (
+            {employees.map(employee => (
               <tr
                 key={employee.id}
                 onClick={() => navigate(`/employees/${employee.id}`)}
@@ -205,7 +337,8 @@ export default function EmployeeListPage() {
       {meta && meta.totalPages > 1 && (
         <div className="flex items-center justify-between mt-4">
           <p className="text-sm text-gray-500">
-            Page {meta.page} of {meta.totalPages}
+            Showing {(meta.page - 1) * meta.pageSize + 1} to{' '}
+            {Math.min(meta.page * meta.pageSize, meta.total)} of {meta.total}
           </p>
           <div className="flex gap-2">
             <button
