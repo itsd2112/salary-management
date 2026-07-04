@@ -1,9 +1,11 @@
 import { Router } from 'express'
-import employeeRouter from './employee.routes'
+import employeeRouter from './employee.routes';
+import lookupRouter from './lookup.routes';
 
 const router = Router()
 
 router.use('/employees', employeeRouter)
+router.use('/', lookupRouter)
 
 // Health check
 router.get('/health', (req, res) => {
