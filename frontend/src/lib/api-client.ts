@@ -1,20 +1,21 @@
-import axios from "axios";
-
+import axios from 'axios'
 import type {
-    Employee,
-    EmployeeFilters,
-    PaginatedResponse,
-    ApiResponse,
-    Department,
-    Country
-} from "@/types";
+  Employee,
+  EmployeeFilters,
+  PaginatedResponse,
+  ApiResponse,
+  Department,
+  Country,
+  AddSalaryInput,
+} from '@/types'
 
-// ---Axios Instance---
+// ─── Axios Instance ───────────────────────────────────────────
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
-    headers: {
-        "Content-Type": 'application/json'
-    }
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 // ─── Response Interceptor ─────────────────────────────────────
@@ -28,18 +29,32 @@ api.interceptors.response.use(
   }
 )
 
-// employee endpoints
+// ─── Employee Endpoints ───────────────────────────────────────
+
 export const employeeApi = {
-    getAll(filters: EmployeeFilters): Promise<PaginatedResponse<Employee>>{
-        return api
-            .get('/employees', { params: filters })
-            .then((res) => res.data)
-    },
-     getById(id: number): Promise<ApiResponse<Employee>> {
-        return api
-        .get(`/employees/${id}`)
-        .then((res) => res.data)
-    },
+  getAll(filters: EmployeeFilters): Promise<PaginatedResponse<Employee>> {
+    return api
+      .get('/employees', { params: filters })
+      .then((res) => res.data)
+  },
+
+  getById(id: number): Promise<ApiResponse<Employee>> {
+    return api
+      .get(`/employees/${id}`)
+      .then((res) => res.data)
+  },
+
+  deactivate(id: number): Promise<ApiResponse<Employee>> {
+    return api
+      .post(`/employees/${id}/deactivate`)
+      .then((res) => res.data)
+  },
+
+  addSalary(id: number, data: AddSalaryInput): Promise<ApiResponse<Employee>> {
+    return api
+      .post(`/employees/${id}/salary`, data)
+      .then((res) => res.data)
+  },
 }
 
 // ─── Lookup Endpoints ─────────────────────────────────────────

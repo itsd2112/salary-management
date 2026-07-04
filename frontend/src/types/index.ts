@@ -18,6 +18,12 @@ export enum SalaryReason {
   PROMOTION = 'PROMOTION',
   CORRECTION = 'CORRECTION',
 }
+export interface AddSalaryInput {
+  baseSalary: number
+  bonus?: number
+  effectiveDate: string
+  reason: SalaryReason
+}
 
 // --Lookup Types--
 export interface Department {
