@@ -25,6 +25,22 @@ export interface AddSalaryInput {
   reason: SalaryReason
 }
 
+export interface CreateEmployeeInput {
+  firstName: string
+  lastName: string
+  email: string
+  departmentId: number
+  countryId: number
+  jobLevel: JobLevel
+  hireDate: string
+  salary: {
+    baseSalary: number
+    bonus?: number
+    effectiveDate: string
+    reason: SalaryReason
+  }
+}
+
 // --Lookup Types--
 export interface Department {
     id: number,

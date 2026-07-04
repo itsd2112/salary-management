@@ -7,6 +7,7 @@ import type {
   Department,
   Country,
   AddSalaryInput,
+  CreateEmployeeInput
 } from '@/types'
 
 // ─── Axios Instance ───────────────────────────────────────────
@@ -42,6 +43,10 @@ export const employeeApi = {
     return api
       .get(`/employees/${id}`)
       .then((res) => res.data)
+  },
+
+  create(data: CreateEmployeeInput): Promise<ApiResponse<Employee>> {
+    return api.post('/employees', data).then((res) => res.data)
   },
 
   deactivate(id: number): Promise<ApiResponse<Employee>> {
