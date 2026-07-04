@@ -92,8 +92,7 @@ export const employeeRepository = {
                 department: true,
                 country: true,
                 salaryHistory: {
-                    orderBy: { effectiveDate: 'desc' },
-                    take: 1,
+                    orderBy: { effectiveDate: 'desc' }
                 },
             },
         })
