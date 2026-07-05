@@ -43,8 +43,22 @@ This application replaces the spreadsheet-based workflow with a centralized, sea
 ---
 
 ## Local Setup
+## Local Setup
 
-### Backend
+### Option A — Docker Compose (recommended)
+
+```bash
+docker compose up
+```
+
+Starts both frontend and backend with seeded data in one command.
+
+- Frontend at `http://localhost:5173`
+- Backend at `http://localhost:3000`
+
+### Option B — Manual
+
+**Backend**
 
 ```bash
 cd backend
@@ -57,7 +71,7 @@ npm run dev
 
 Runs at `http://localhost:3000`
 
-### Frontend
+**Frontend**
 
 ```bash
 cd frontend
