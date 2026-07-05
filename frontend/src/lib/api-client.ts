@@ -7,7 +7,12 @@ import type {
   Department,
   Country,
   AddSalaryInput,
-  CreateEmployeeInput
+  CreateEmployeeInput,
+  AnalyticsSummary,
+  DepartmentAnalytics,
+  CountryAnalytics,
+  SalaryDistribution,
+  TopPaidEmployee,
 } from '@/types'
 
 // ─── Axios Instance ───────────────────────────────────────────
@@ -74,4 +79,29 @@ export const lookupApi = {
   },
 }
 
+
 export default api
+
+export const analyticsApi = {
+  getSummary(): Promise<ApiResponse<AnalyticsSummary>> {
+    return api.get('/analytics/summary').then((res) => res.data)
+  },
+
+  getByDepartment(): Promise<ApiResponse<DepartmentAnalytics[]>> {
+    return api.get('/analytics/by-department').then((res) => res.data)
+  },
+
+  getByCountry(): Promise<ApiResponse<CountryAnalytics[]>> {
+    return api.get('/analytics/by-country').then((res) => res.data)
+  },
+
+  getDistribution(): Promise<ApiResponse<SalaryDistribution[]>> {
+    return api.get('/analytics/distribution').then((res) => res.data)
+  },
+
+  getTopPaid(limit = 10): Promise<ApiResponse<TopPaidEmployee[]>> {
+    return api
+      .get('/analytics/top-paid', { params: { limit } })
+      .then((res) => res.data)
+  },
+}

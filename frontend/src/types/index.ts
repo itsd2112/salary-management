@@ -117,3 +117,46 @@ export interface EmployeeFilters {
   page?: number
   pageSize?: number
 }
+
+// ─── Analytics ────────────────────────────────────────────────
+
+export interface AnalyticsSummary {
+  totalEmployees: number
+  totalPayroll: number
+  averageSalary: number
+  highestSalary: number
+  lowestSalary: number
+}
+
+export interface DepartmentAnalytics {
+  department: string
+  totalPayroll: number
+  averageSalary: number
+  employeeCount: number
+}
+
+export interface CountryAnalytics {
+  country: string
+  currencyCode: string
+  totalPayroll: number
+  averageSalary: number
+  employeeCount: number
+}
+
+export interface SalaryDistribution {
+  band: string
+  count: number
+  min: number
+  max: number
+}
+
+export interface TopPaidEmployee {
+  id: number
+  employeeCode: string
+  firstName: string
+  lastName: string
+  department: string
+  country: string
+  baseSalary: number
+  bonus: number
+}
