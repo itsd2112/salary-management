@@ -1,6 +1,6 @@
 # Employee Salary Management System
 
-A full-stack web application for managing employee compensation and payroll analytics for ACME's HR team.
+A full-stack web application for managing employee compensation and payroll analytics for organizations with approximately **10,000 employees**.
 
 ---
 
